@@ -55,14 +55,13 @@
                 <h2 class="text-3xl font-extrabold mb-3 text-center text-gray-800">Step 1: Create Your Profile</h2>
                 <p class="text-center text-gray-600 mb-6">Your data is stored securely by Netlify and is only used to find relevant job matches.</p>
                 
-                <!-- NOTE: Netlify Forms requires data-netlify="true" and a unique name="form-name" -->
+                <!-- NOTE: Netlify Forms uses data-netlify="true" for submission -->
                 <form 
                     id="registration-form" 
                     name="user-registration" 
                     method="POST" 
                     data-netlify="true"
                     netlify-honeypot="bot-field"
-                    action="/success"
                     onsubmit="handleRegistration(event)">
                     
                     <!-- Honeypot field for bot filtering (required for Netlify Forms) -->
@@ -159,16 +158,6 @@
                 </form>
             </div>
         </div>
-
-        <!-- Hidden Success Page (Used by Netlify to trigger next view) -->
-        <!-- The user is redirected here by the server, and the JS handles the view change -->
-        <div id="success-page" class="hidden">
-             <div class="text-center p-16 card bg-white rounded-xl max-w-2xl mx-auto">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mx-auto text-emerald-500 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-8.86"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                <h2 class="text-3xl font-extrabold mb-3 text-gray-800">Registration Complete!</h2>
-                <p class="text-gray-600 mb-6">Your data has been securely saved to the Netlify dashboard. Redirecting you now to the Job Matcher...</p>
-            </div>
-        </div>
         
         <!-- Job Matcher View (Main App) -->
         <div id="matcher-view" class="hidden">
@@ -199,7 +188,7 @@
 
                         <!-- Status/Loading Area -->
                         <div id="status-area" class="text-center p-8 bg-gray-50 rounded-lg flex-grow flex flex-col justify-center items-center h-48">
-                            <p class="text-gray-500 italic font-medium">Results will appear here after analysis.</p>
+                            <p class="text-gray-500 italic font-medium">Enter a resume and click the button to start the analysis.</p>
                         </div>
 
                         <!-- Extracted Keywords Display -->
@@ -241,11 +230,15 @@
         // --- Configuration & Constants ---
         const API_URL_BASE = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=`;
         const apiKey = ""; // Leave as-is for the Gemini API call
-
+        const REGISTRATION_FORM_NAME = 'user-registration';
+        
         // --- UI Elements ---
         const registrationView = document.getElementById('registration-view');
         const matcherView = document.getElementById('matcher-view');
-        const successPage = document.getElementById('success-page');
+        const registrationForm = document.getElementById('registration-form');
+        const registerButton = document.getElementById('register-button');
+        const regErrorMessage = document.getElementById('reg-error-message');
+        
         const findJobsButton = document.getElementById('find-jobs-button');
         const resumeInput = document.getElementById('resume-input');
         const statusArea = document.getElementById('status-area');
@@ -257,36 +250,54 @@
 
 
         /**
-         * Initializes the app. Checks the current URL hash for Netlify redirection.
-         * If the URL ends with /success (meaning the form just submitted), skip to the matcher view.
+         * Transitions the view from the registration form to the main job matcher area.
          */
-        function initializeApp() {
-            // Check if the current URL path ends with /success (Netlify redirect after submission)
-            if (window.location.pathname.endsWith('/success')) {
-                // Display the success message for a moment and then transition
-                registrationView.classList.add('hidden');
-                successPage.classList.remove('hidden');
-                setTimeout(() => {
-                    successPage.classList.add('hidden');
-                    matcherView.classList.remove('hidden');
-                    // Clean up the URL hash to prevent loops
-                    window.history.pushState({}, '', window.location.pathname.replace('/success', '/'));
-                }, 2500); // Display success message for 2.5 seconds
-            } else {
-                // Normal load: Show the registration form
-                registrationView.classList.remove('hidden');
-                matcherView.classList.add('hidden');
-            }
+        function showMatcher() {
+            registrationView.classList.add('hidden');
+            matcherView.classList.remove('hidden');
         }
-        
+
         /**
-         * Netlify handles form submission, so this function is just for client-side validation
-         * and preventing the AI logic from running until registration is complete.
+         * Handles the form submission using AJAX to prevent the server-side redirect (the 404 error).
+         * @param {Event} event 
          */
-        window.handleRegistration = function(event) {
-            // Netlify handles the actual data posting. 
-            // We just ensure the form submits normally.
-            return true;
+        window.handleRegistration = async function(event) {
+            event.preventDefault(); // STOP the browser's default submission and redirect
+
+            const form = event.target;
+            const data = new FormData(form);
+
+            registerButton.disabled = true;
+            registerButton.innerHTML = `<div class="flex items-center justify-center space-x-2"><div class="loading-dot w-4 h-4 bg-white rounded-full"></div><div class="loading-dot w-4 h-4 bg-white rounded-full"></div><div class="loading-dot w-4 h-4 bg-white rounded-full"></div><span>Securing Profile...</span></div>`;
+            regErrorMessage.classList.add('hidden');
+            
+            // The magic: Submit the data to Netlify via fetch (AJAX)
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(data).toString()
+                });
+
+                if (response.ok) {
+                    // Success! Data is collected in the Netlify dashboard.
+                    // Now, transition the view to the main app.
+                    showMatcher();
+                    // Optionally alert the user with a message in the matcher view's status area
+                    statusArea.innerHTML = `<p class="text-emerald-700 font-bold">Registration Complete! Welcome to the Matcher.</p>`;
+
+                } else {
+                    // This handles server-side errors (rare, but possible)
+                    throw new Error(`Netlify form submission failed with status: ${response.status}`);
+                }
+
+            } catch (error) {
+                console.error("Form submission error:", error);
+                regErrorMessage.textContent = 'Registration failed. Please check your connection and try again.';
+                regErrorMessage.classList.remove('hidden');
+                registerButton.disabled = false;
+                registerButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="icon-svg inline w-5 h-5 mr-2 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Secure Profile & Start Matching`;
+            }
         }
 
         // --- Gemini API Functions (AI Logic remains the same) ---
@@ -488,7 +499,20 @@
         }
 
         // Start the app initialization
-        initializeApp();
+        window.onload = function() {
+            // Check for the "thank you" hash added by Netlify after successful AJAX submission
+            if (window.location.hash === '#thankyou') {
+                 // If a submission just happened, clear the hash and show the matcher view
+                 window.location.hash = '';
+                 showMatcher();
+                 statusArea.innerHTML = `<p class="text-emerald-700 font-bold">Registration Complete! Welcome to the Matcher.</p>`;
+            } else {
+                 // Otherwise, show the registration form first
+                 registrationView.classList.remove('hidden');
+                 matcherView.classList.add('hidden');
+            }
+        };
+
     </script>
 </body>
 </html>
