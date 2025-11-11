@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Success! Profile Secured</title>
+    <!-- We must use a short redirect time to force the browser back to the main page -->
+    <meta http-equiv="refresh" content="3; url=/">
+    <script>
+        // Use JavaScript to force the redirect if the meta tag fails or is slow
+        setTimeout(function() {
+            window.location.href = '/';
+        }, 3000);
+    </script>
+</head>
+<body>
+    <div style="font-family: sans-serif; text-align: center; padding: 50px;">
+        <h1>Success!</h1>
+        <p>Your profile has been saved. Redirecting to the Job Matcher...</p>
+        <p>If you are not redirected in 3 seconds, please click <a href="/">here</a>.</p>
+    </div>
+</body>
+</html>
+
+
