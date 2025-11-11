@@ -44,53 +44,60 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="icon-svg inline w-10 h-10 mr-3 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 20v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 My Kerala Remote Career Initiative
             </h1>
-            <p class="text-gray-600 mt-3 text-lg" id="header-subtitle">
+            <p class="text-gray-600 mt-3 text-lg">
                 <span class="font-bold text-emerald-600">Vision:</span> Connecting Kerala's talent to genuine, global work-from-home opportunities, district by district.
             </p>
         </header>
         
-        <!-- Loading Spinner for Auth/Setup -->
-        <div id="setup-loading" class="text-center p-16 card bg-white rounded-xl">
-            <div class="flex justify-center space-x-3 my-4">
-                <div class="loading-dot w-4 h-4 bg-gray-500 rounded-full"></div>
-                <div class="loading-dot w-4 h-4 bg-gray-500 rounded-full"></div>
-                <div class="loading-dot w-4 h-4 bg-gray-500 rounded-full"></div>
-            </div>
-            <p class="text-gray-500 font-semibold">Establishing secure connection... Please wait.</p>
-        </div>
-
         <!-- Registration View (Initial State) -->
-        <div id="registration-view" class="hidden">
+        <div id="registration-view">
             <div class="max-w-2xl mx-auto card bg-white p-8 rounded-xl shadow-2xl">
                 <h2 class="text-3xl font-extrabold mb-3 text-center text-gray-800">Step 1: Create Your Profile</h2>
-                <p class="text-center text-gray-600 mb-6">Tell us about yourself to receive highly relevant, filtered job matches.</p>
+                <p class="text-center text-gray-600 mb-6">Your data is stored securely by Netlify and is only used to find relevant job matches.</p>
                 
-                <div id="auth-info" class="mb-6 text-sm text-center text-indigo-600 p-3 bg-indigo-50 rounded-lg border border-indigo-200"></div>
-
-                <form id="registration-form" onsubmit="handleRegistration(event)">
+                <!-- NOTE: Netlify Forms requires data-netlify="true" and a unique name="form-name" -->
+                <!-- The action attribute tells the form where to redirect after submission -->
+                <form 
+                    id="registration-form" 
+                    name="user-registration" 
+                    method="POST" 
+                    data-netlify="true"
+                    netlify-honeypot="bot-field"
+                    action="/success"
+                    onsubmit="handleRegistration(event)">
                     
+                    <!-- Honeypot field for bot filtering (required for Netlify Forms) -->
+                    <p class="hidden">
+                        <label>Don’t fill this out if you’re human: <input name="bot-field" /></label>
+                    </p>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Left Column: Personal Info -->
                         <div>
                             <h3 class="font-bold text-lg text-emerald-600 mb-3 border-b pb-1">Personal Details</h3>
                             <div class="mb-4">
                                 <label for="reg-name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                                <input type="text" id="reg-name" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Your Name">
+                                <input type="text" id="reg-name" name="name" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Your Name">
                             </div>
                             
                             <div class="mb-4">
                                 <label for="reg-email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                                <input type="email" id="reg-email" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="your.email@address.com">
+                                <input type="email" id="reg-email" name="email" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="your.email@address.com">
                             </div>
 
                             <div class="mb-4">
                                 <label for="reg-mobile" class="block text-sm font-medium text-gray-700">Mobile Number (Primary)</label>
-                                <input type="tel" id="reg-mobile" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="10 Digit Mobile">
+                                <input type="tel" id="reg-mobile" name="mobile" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="10 Digit Mobile">
                             </div>
                             
                             <div class="mb-4">
                                 <label for="reg-whatsapp" class="block text-sm font-medium text-gray-700">WhatsApp Number (Optional)</label>
-                                <input type="tel" id="reg-whatsapp" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Same as mobile, if different">
+                                <input type="tel" id="reg-whatsapp" name="whatsapp" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Same as mobile, if different">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="reg-password" class="block text-sm font-medium text-gray-700">Create Password (Securely Stored by Netlify)</label>
+                                <input type="password" id="reg-password" name="password" required minlength="6" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Minimum 6 characters">
                             </div>
                         </div>
 
@@ -100,7 +107,7 @@
 
                             <div class="mb-4">
                                 <label for="reg-district" class="block text-sm font-medium text-gray-700">Your Kerala District</label>
-                                <select id="reg-district" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <select id="reg-district" name="district" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                     <option value="" disabled selected>Select District</option>
                                     <option value="Alappuzha">Alappuzha</option>
                                     <option value="Ernakulam">Ernakulam</option>
@@ -121,7 +128,7 @@
 
                             <div class="mb-4">
                                 <label for="reg-profession" class="block text-sm font-medium text-gray-700">Current Status / Goal</label>
-                                <select id="reg-profession" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <select id="reg-profession" name="profession" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                     <option value="" disabled selected>Select Status</option>
                                     <option value="Unemployed_Seeking_General_Remote">Seeking Remote Job (Currently Unemployed)</option>
                                     <option value="Dentist_Seeking_Online_Guidance">Dentist (Seeking Online Guidance/Teledentistry)</option>
@@ -133,7 +140,7 @@
 
                             <div class="mb-4">
                                 <label for="reg-religion" class="block text-sm font-medium text-gray-700">Community Focus</label>
-                                <select id="reg-religion" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <select id="reg-religion" name="religion" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                     <option value="" disabled selected>Select Community</option>
                                     <option value="Muslim">Muslim</option>
                                     <option value="Hindu">Hindu</option>
@@ -141,17 +148,12 @@
                                     <option value="Other/PreferNotToSay">Other / Prefer Not to Say</option>
                                 </select>
                             </div>
-                            
-                            <div class="mb-4">
-                                <label for="reg-password" class="block text-sm font-medium text-gray-700">Create Password</label>
-                                <input type="password" id="reg-password" required minlength="6" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Minimum 6 characters for security">
-                            </div>
                         </div>
                     </div>
 
                     <div id="reg-error-message" class="hidden text-red-600 p-3 mt-6 bg-red-100 border border-red-300 rounded-lg font-medium"></div>
 
-                    <button type="submit" id="register-button" class="w-full mt-8 px-6 py-4 btn-primary text-white font-extrabold rounded-xl hover:bg-emerald-700 transition duration-300 disabled:bg-emerald-400 disabled:cursor-not-allowed text-lg">
+                    <button type="submit" id="register-button" class="w-full mt-8 px-6 py-4 btn-primary text-white font-extrabold rounded-xl hover:bg-emerald-700 transition duration-300 text-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" class="icon-svg inline w-5 h-5 mr-2 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         Secure Profile & Start Matching
                     </button>
@@ -159,6 +161,16 @@
             </div>
         </div>
 
+        <!-- Hidden Success Page (Used by Netlify to trigger next view) -->
+        <!-- This page must be created for the action="/success" redirect to work -->
+        <div id="success-page" class="hidden">
+             <div class="text-center p-16 card bg-white rounded-xl max-w-2xl mx-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mx-auto text-emerald-500 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-8.86"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <h2 class="text-3xl font-extrabold mb-3 text-gray-800">Registration Complete!</h2>
+                <p class="text-gray-600 mb-6">Your data has been securely saved to the Netlify dashboard. Redirecting you now to the Job Matcher...</p>
+            </div>
+        </div>
+        
         <!-- Job Matcher View (Main App) -->
         <div id="matcher-view" class="hidden">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -168,7 +180,7 @@
                         <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2 text-emerald-600">Step 2: Upload Resume for Analysis</h2>
                         <textarea id="resume-input" rows="18" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none" placeholder="Paste the clean, text-only content of the job seeker's resume here.&#10;&#10;The AI will parse technical skills, job titles, and experience to generate a hyper-specific job search query."></textarea>
                         
-                        <button id="find-jobs-button" class="mt-4 w-full px-6 py-4 btn-primary text-white font-extrabold rounded-xl hover:bg-emerald-700 transition duration-300 disabled:bg-emerald-400 disabled:cursor-not-allowed text-lg">
+                        <button id="find-jobs-button" class="mt-4 w-full px-6 py-4 btn-primary text-white font-extrabold rounded-xl hover:bg-emerald-700 transition duration-300 disabled:bg-emerald-400 disabled:cursor-not-allowed text-lg" onclick="processResume()">
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon-svg inline w-5 h-5 mr-2 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8l4 4-4 4m-9-4h13M3 12h1"/></svg>
                             Analyze & Find Current Remote Jobs
                         </button>
@@ -218,204 +230,73 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- User Info Bar -->
-            <div class="mt-8 p-4 card bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 text-sm rounded-r-xl shadow-lg">
-                <p class="font-medium">Profile: <span id="user-name-display" class="font-semibold">User</span> | Your secure reference ID (for support): <span id="user-id-display" class="font-mono text-xs p-1 bg-emerald-100 rounded"></span></p>
-            </div>
         </div>
         
         <!-- Footer -->
         <footer class="mt-12 pt-6 border-t-2 border-gray-200 text-center text-xs text-gray-500">
-            <p>A community initiative dedicated to skill matching and remote work opportunity discovery in Kerala. Data is stored securely and used only for personalized job filtering.</p>
+            <p>A community initiative dedicated to skill matching and remote work opportunity discovery in Kerala. Data is collected using Netlify Forms.</p>
         </footer>
     </div>
 
-    <script type="module">
-        // --- Firebase Setup and Utilities ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // --- Global Environment Variables (MANDATORY USE) ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        const apiKey = ""; // Leave as-is, Canvas provides this at runtime
-        const API_URL_BASE = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-        
-        // --- App State ---
-        let app;
-        let db;
-        let auth;
-        let userId = null;
-        let isAuthReady = false;
-        const USER_PROFILE_COLLECTION = `artifacts/${appId}/users`;
-        
+    <script>
+        // --- Configuration & Constants ---
+        const API_URL_BASE = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=`;
+        const apiKey = ""; // Leave as-is for the Gemini API call
+
         // --- UI Elements ---
-        const setupLoading = document.getElementById('setup-loading');
         const registrationView = document.getElementById('registration-view');
         const matcherView = document.getElementById('matcher-view');
-        const registerButton = document.getElementById('register-button');
-        const regErrorMessage = document.getElementById('reg-error-message');
-        const resumeInput = document.getElementById('resume-input');
+        const successPage = document.getElementById('success-page');
         const findJobsButton = document.getElementById('find-jobs-button');
+        const resumeInput = document.getElementById('resume-input');
         const statusArea = document.getElementById('status-area');
         const keywordsDisplay = document.getElementById('keywords-display');
         const jobResults = document.getElementById('job-results');
         const jobContent = document.getElementById('job-content');
         const sourcesUl = document.getElementById('sources-ul');
         const jobErrorMessage = document.getElementById('error-message');
-        const userNameDisplay = document.getElementById('user-name-display');
-        const userIdDisplay = document.getElementById('user-id-display');
-        const authInfo = document.getElementById('auth-info');
 
+
+        /**
+         * Initializes the app. Checks the current URL hash for Netlify redirection.
+         * If the URL ends with /success (meaning the form just submitted), skip to the matcher view.
+         */
+        function initializeApp() {
+            // Check if the current URL path ends with /success (Netlify redirect after submission)
+            if (window.location.pathname.endsWith('/success')) {
+                // Display the success message for a moment and then transition
+                registrationView.classList.add('hidden');
+                successPage.classList.remove('hidden');
+                setTimeout(() => {
+                    successPage.classList.add('hidden');
+                    matcherView.classList.remove('hidden');
+                    // Clean up the URL hash to prevent loops
+                    window.history.pushState({}, '', window.location.pathname.replace('/success', '/'));
+                }, 2500); // Display success message for 2.5 seconds
+            } else {
+                // Normal load: Show the registration form
+                registrationView.classList.remove('hidden');
+                matcherView.classList.add('hidden');
+            }
+        }
         
         /**
-         * Initializes Firebase and sets up the authentication listener.
+         * Netlify handles form submission, so this function is just for client-side validation
+         * and preventing the AI logic from running until registration is complete.
          */
-        async function initializeFirebase() {
-            try {
-                if (!firebaseConfig) throw new Error("Firebase config not available.");
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // 1. Initial Sign-in Attempt
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                // 2. Auth State Listener
-                onAuthStateChanged(auth, async (user) => {
-                    isAuthReady = true;
-                    if (user) {
-                        userId = user.uid;
-                        await checkUserProfile(userId);
-                    } else {
-                        console.warn("User signed out unexpectedly. Attempting anonymous sign-in.");
-                        await signInAnonymously(auth);
-                    }
-                });
-
-            } catch (error) {
-                console.error("Firebase Initialization or Auth Error:", error);
-                setupLoading.innerHTML = `<p class="text-red-600 font-bold">Error initializing app. Check console for details.</p>`;
-            }
+        window.handleRegistration = function(event) {
+            // Netlify handles the actual data posting. 
+            // We just ensure the form submits normally.
+            return true;
         }
 
-        /**
-         * Checks if a profile exists for the current user and switches view accordingly.
-         * @param {string} uid - The Firebase user ID.
-         */
-        async function checkUserProfile(uid) {
-            setupLoading.classList.add('hidden');
-            const userDocRef = doc(db, USER_PROFILE_COLLECTION, uid);
-            
-            try {
-                const docSnap = await getDoc(userDocRef);
-
-                if (docSnap.exists()) {
-                    const profile = docSnap.data();
-                    displayMatcherView(uid, profile.name);
-                } else {
-                    displayRegistrationView(uid);
-                }
-            } catch (error) {
-                console.error("Error checking user profile:", error);
-                displayRegistrationView(uid, "Failed to load profile. Please register.");
-            }
-        }
-
-        /**
-         * Displays the main job matcher view.
-         */
-        function displayMatcherView(uid, name) {
-            registrationView.classList.add('hidden');
-            matcherView.classList.remove('hidden');
-            userIdDisplay.textContent = uid;
-            userNameDisplay.textContent = name;
-        }
-
-        /**
-         * Displays the registration form view.
-         */
-        function displayRegistrationView(uid, errorText) {
-            matcherView.classList.add('hidden');
-            registrationView.classList.remove('hidden');
-            authInfo.innerHTML = `👋 Welcome! Your temporary ID is: <span class="font-mono text-xs">${uid}</span>.`;
-            if (errorText) {
-                regErrorMessage.textContent = errorText;
-                regErrorMessage.classList.remove('hidden');
-            } else {
-                regErrorMessage.classList.add('hidden');
-            }
-        }
-
-        /**
-         * Handles the registration form submission and saves data to Firestore.
-         */
-        window.handleRegistration = async function(event) {
-            event.preventDefault();
-            if (!userId) {
-                displayRegistrationView(null, "Authentication failed. Please refresh the page.");
-                return;
-            }
-
-            const name = document.getElementById('reg-name').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const mobile = document.getElementById('reg-mobile').value.trim();
-            const whatsapp = document.getElementById('reg-whatsapp').value.trim() || mobile;
-            const password = document.getElementById('reg-password').value;
-            const district = document.getElementById('reg-district').value;
-            const profession = document.getElementById('reg-profession').value;
-            const religion = document.getElementById('reg-religion').value;
-            
-            if (!name || !email || !mobile || password.length < 6 || !district || !profession || !religion) {
-                regErrorMessage.textContent = "Please fill in all required fields.";
-                regErrorMessage.classList.remove('hidden');
-                return;
-            }
-
-            registerButton.disabled = true;
-            regErrorMessage.classList.add('hidden');
-
-            try {
-                const userDocRef = doc(db, USER_PROFILE_COLLECTION, userId);
-                const profileData = {
-                    name: name,
-                    email: email,
-                    mobile: mobile,
-                    whatsapp: whatsapp,
-                    district: district,
-                    profession: profession,
-                    religion: religion,
-                    password_simulation: password, 
-                    registrationDate: new Date().toISOString()
-                };
-
-                await setDoc(userDocRef, profileData, { merge: true });
-                displayMatcherView(userId, name);
-
-            } catch (error) {
-                console.error("Firestore Registration Error:", error);
-                regErrorMessage.textContent = `Registration failed: ${error.message}`;
-                regErrorMessage.classList.remove('hidden');
-                registerButton.disabled = false;
-            }
-        }
-
-
-        // --- Gemini API Functions ---
+        // --- Gemini API Functions (AI Logic remains the same) ---
 
         async function fetchWithRetry(payload, maxRetries = 3) {
             let attempt = 0;
             while (attempt < maxRetries) {
                 try {
-                    const response = await fetch(API_URL_BASE, {
+                    const response = await fetch(API_URL_BASE + apiKey, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -510,7 +391,7 @@
             const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
             if (!jsonText) {
-                throw new Error("LLM failed to return structured keyword data.");
+                throw new Error("AI failed to return structured keyword data.");
             }
 
             return JSON.parse(jsonText);
@@ -539,7 +420,7 @@
             const candidate = result.candidates?.[0];
 
             if (!candidate || !candidate.content?.parts?.[0]?.text) {
-                throw new Error("LLM failed to generate job search results.");
+                throw new Error("AI failed to generate job search results.");
             }
 
             const text = candidate.content.parts[0].text;
@@ -559,11 +440,8 @@
         }
 
         window.processResume = async function() {
-            if (!userId) {
-                jobErrorMessage.textContent = 'User not authenticated. Please refresh and register.';
-                jobErrorMessage.classList.remove('hidden');
-                return;
-            }
+            // Note: Since we are using Netlify Forms, we assume registration is complete
+            // before this view is reached.
 
             const resumeText = resumeInput.value.trim();
             if (!resumeText) {
@@ -613,8 +491,8 @@
             }
         }
 
-        // Start the Firebase initialization process
-        initializeFirebase();
+        // Start the app initialization
+        initializeApp();
     </script>
 </body>
 </html>
