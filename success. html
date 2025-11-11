@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Success</title>
+    <!-- Instructs the browser to redirect immediately back to the root URL (/) -->
+    <meta http-equiv="refresh" content="0; url=/">
+</head>
+<body>
+    <!-- This page is only used for server redirection. The content is hidden. -->
+</body>
+</html>
+
+
