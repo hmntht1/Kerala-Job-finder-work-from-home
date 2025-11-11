@@ -56,7 +56,6 @@
                 <p class="text-center text-gray-600 mb-6">Your data is stored securely by Netlify and is only used to find relevant job matches.</p>
                 
                 <!-- NOTE: Netlify Forms requires data-netlify="true" and a unique name="form-name" -->
-                <!-- The action attribute tells the form where to redirect after submission -->
                 <form 
                     id="registration-form" 
                     name="user-registration" 
@@ -96,7 +95,7 @@
                             </div>
                             
                             <div class="mb-4">
-                                <label for="reg-password" class="block text-sm font-medium text-gray-700">Create Password (Securely Stored by Netlify)</label>
+                                <label for="reg-password" class="block text-sm font-medium text-gray-700">Create Password</label>
                                 <input type="password" id="reg-password" name="password" required minlength="6" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Minimum 6 characters">
                             </div>
                         </div>
@@ -162,7 +161,7 @@
         </div>
 
         <!-- Hidden Success Page (Used by Netlify to trigger next view) -->
-        <!-- This page must be created for the action="/success" redirect to work -->
+        <!-- The user is redirected here by the server, and the JS handles the view change -->
         <div id="success-page" class="hidden">
              <div class="text-center p-16 card bg-white rounded-xl max-w-2xl mx-auto">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mx-auto text-emerald-500 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-8.86"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
@@ -440,9 +439,6 @@
         }
 
         window.processResume = async function() {
-            // Note: Since we are using Netlify Forms, we assume registration is complete
-            // before this view is reached.
-
             const resumeText = resumeInput.value.trim();
             if (!resumeText) {
                 jobErrorMessage.textContent = 'Please paste the resume text into the box to start the analysis.';
