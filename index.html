@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Remote Job Matcher - Kerala Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #10B981; /* Emerald Green - for authenticity/Kerala theme */
+            --color-secondary: #4F46E5; /* Indigo - for professionalism/AI */
+            --color-bg: #F0FDF4; /* Light Green/White background */
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--color-bg); }
+        .card { 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05); 
+            transition: transform 0.3s ease;
+        }
+        .card:hover { transform: translateY(-2px); }
+        .btn-primary { 
+            background-color: var(--color-primary); 
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+        }
+        .loading-dot { animation: dot-pulse 1.5s infinite; }
+        .loading-dot:nth-child(2) { animation-delay: 0.3s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.6s; }
+        @keyframes dot-pulse {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        #resume-input::-webkit-scrollbar { width: 8px; }
+        #resume-input::-webkit-scrollbar-thumb { background-color: #34D399; border-radius: 4px; }
+        #resume-input::-webkit-scrollbar-track { background-color: #E6FFFA; }
+        .icon-svg { color: var(--color-secondary); }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8">
+
+    <div id="app-container" class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-12 p-4 bg-white rounded-xl card">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon-svg inline w-10 h-10 mr-3 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 20v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                My Kerala Remote Career Initiative
+            </h1>
+            <p class="text-gray-600 mt-3 text-lg" id="header-subtitle">
+                <span class="font-bold text-emerald-600">Vision:</span> Connecting Kerala's talent to genuine, global work-from-home opportunities, district by district.
+            </p>
+        </header>
+        
+        <!-- Loading Spinner for Auth/Setup -->
+        <div id="setup-loading" class="text-center p-16 card bg-white rounded-xl">
+            <div class="flex justify-center space-x-3 my-4">
+                <div class="loading-dot w-4 h-4 bg-gray-500 rounded-full"></div>
+                <div class="loading-dot w-4 h-4 bg-gray-500 rounded-full"></div>
+                <div class="loading-dot w-4 h-4 bg-gray-500 rounded-full"></div>
+            </div>
+            <p class="text-gray-500 font-semibold">Establishing secure connection... Please wait.</p>
+        </div>
+
+        <!-- Registration View (Initial State) -->
+        <div id="registration-view" class="hidden">
+            <div class="max-w-2xl mx-auto card bg-white p-8 rounded-xl shadow-2xl">
+                <h2 class="text-3xl font-extrabold mb-3 text-center text-gray-800">Step 1: Create Your Profile</h2>
+                <p class="text-center text-gray-600 mb-6">Tell us about yourself to receive highly relevant, filtered job matches.</p>
+                
+                <div id="auth-info" class="mb-6 text-sm text-center text-indigo-600 p-3 bg-indigo-50 rounded-lg border border-indigo-200"></div>
+
+                <form id="registration-form" onsubmit="handleRegistration(event)">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Left Column: Personal Info -->
+                        <div>
+                            <h3 class="font-bold text-lg text-emerald-600 mb-3 border-b pb-1">Personal Details</h3>
+                            <div class="mb-4">
+                                <label for="reg-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                                <input type="text" id="reg-name" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Your Name">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="reg-email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                                <input type="email" id="reg-email" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="your.email@address.com">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="reg-mobile" class="block text-sm font-medium text-gray-700">Mobile Number (Primary)</label>
+                                <input type="tel" id="reg-mobile" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="10 Digit Mobile">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="reg-whatsapp" class="block text-sm font-medium text-gray-700">WhatsApp Number (Optional)</label>
+                                <input type="tel" id="reg-whatsapp" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Same as mobile, if different">
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Targeted Info -->
+                        <div>
+                            <h3 class="font-bold text-lg text-emerald-600 mb-3 border-b pb-1">Location & Community Focus</h3>
+
+                            <div class="mb-4">
+                                <label for="reg-district" class="block text-sm font-medium text-gray-700">Your Kerala District</label>
+                                <select id="reg-district" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="" disabled selected>Select District</option>
+                                    <option value="Alappuzha">Alappuzha</option>
+                                    <option value="Ernakulam">Ernakulam</option>
+                                    <option value="Idukki">Idukki</option>
+                                    <option value="Kannur">Kannur</option>
+                                    <option value="Kasaragod">Kasaragod</option>
+                                    <option value="Kollam">Kollam</option>
+                                    <option value="Kottayam">Kottayam</option>
+                                    <option value="Kozhikode">Kozhikode</option>
+                                    <option value="Malappuram">Malappuram</option>
+                                    <option value="Palakkad">Palakkad</option>
+                                    <option value="Pathanamthitta">Pathanamthitta</option>
+                                    <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                                    <option value="Thrissur">Thrissur</option>
+                                    <option value="Wayanad">Wayanad</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="reg-profession" class="block text-sm font-medium text-gray-700">Current Status / Goal</label>
+                                <select id="reg-profession" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="" disabled selected>Select Status</option>
+                                    <option value="Unemployed_Seeking_General_Remote">Seeking Remote Job (Currently Unemployed)</option>
+                                    <option value="Dentist_Seeking_Online_Guidance">Dentist (Seeking Online Guidance/Teledentistry)</option>
+                                    <option value="Student">Student / Recent Graduate</option>
+                                    <option value="Homemaker_Seeking_Flexible_Work">Homemaker (Seeking Flexible Work)</option>
+                                    <option value="Other_Professional">Other Professional</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="reg-religion" class="block text-sm font-medium text-gray-700">Community Focus</label>
+                                <select id="reg-religion" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="" disabled selected>Select Community</option>
+                                    <option value="Muslim">Muslim</option>
+                                    <option value="Hindu">Hindu</option>
+                                    <option value="Christian">Christian</option>
+                                    <option value="Other/PreferNotToSay">Other / Prefer Not to Say</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="reg-password" class="block text-sm font-medium text-gray-700">Create Password</label>
+                                <input type="password" id="reg-password" required minlength="6" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Minimum 6 characters for security">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="reg-error-message" class="hidden text-red-600 p-3 mt-6 bg-red-100 border border-red-300 rounded-lg font-medium"></div>
+
+                    <button type="submit" id="register-button" class="w-full mt-8 px-6 py-4 btn-primary text-white font-extrabold rounded-xl hover:bg-emerald-700 transition duration-300 disabled:bg-emerald-400 disabled:cursor-not-allowed text-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon-svg inline w-5 h-5 mr-2 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Secure Profile & Start Matching
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Job Matcher View (Main App) -->
+        <div id="matcher-view" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column: Resume Input & Trust Panel -->
+                <div class="lg:col-span-2">
+                    <div class="card bg-white p-6 rounded-xl mb-8">
+                        <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2 text-emerald-600">Step 2: Upload Resume for Analysis</h2>
+                        <textarea id="resume-input" rows="18" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none" placeholder="Paste the clean, text-only content of the job seeker's resume here.&#10;&#10;The AI will parse technical skills, job titles, and experience to generate a hyper-specific job search query."></textarea>
+                        
+                        <button id="find-jobs-button" class="mt-4 w-full px-6 py-4 btn-primary text-white font-extrabold rounded-xl hover:bg-emerald-700 transition duration-300 disabled:bg-emerald-400 disabled:cursor-not-allowed text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon-svg inline w-5 h-5 mr-2 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8l4 4-4 4m-9-4h13M3 12h1"/></svg>
+                            Analyze & Find Current Remote Jobs
+                        </button>
+                    </div>
+
+                    <!-- Trust/Security Message -->
+                    <div class="p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg text-yellow-800">
+                        <p class="font-semibold text-sm">Genuine Opportunities Only:</p>
+                        <p class="text-xs">We use Google's grounded search technology to find real-time, active job postings and filter out common scams. Always cross-check the sources provided.</p>
+                    </div>
+                </div>
+
+                <!-- Right Column: Results & Status -->
+                <div class="lg:col-span-1">
+                    <div class="card bg-white p-6 rounded-xl flex flex-col">
+                        <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2 text-indigo-600">Matching Results</h2>
+
+                        <!-- Status/Loading Area -->
+                        <div id="status-area" class="text-center p-8 bg-gray-50 rounded-lg flex-grow flex flex-col justify-center items-center h-48">
+                            <p class="text-gray-500 italic font-medium">Results will appear here after analysis.</p>
+                        </div>
+
+                        <!-- Extracted Keywords Display -->
+                        <div id="keywords-display" class="mt-4 p-4 bg-indigo-50 rounded-lg hidden">
+                            <h3 class="font-semibold text-base text-indigo-700 mb-2">✅ Extracted Search Profile:</h3>
+                            <ul class="list-disc list-inside space-y-1 text-sm text-gray-700 ml-4">
+                                <li><strong class="text-emerald-600">Skills:</strong> <span id="list-skills"></span></li>
+                                <li><strong class="text-emerald-600">Titles:</strong> <span id="list-titles"></span></li>
+                                <li><strong class="text-emerald-600">Industries:</strong> <span id="list-industries"></span></li>
+                            </ul>
+                        </div>
+
+                        <!-- Job Results Area -->
+                        <div id="job-results" class="mt-6 border-t pt-4 hidden">
+                            <h3 class="text-lg font-bold text-emerald-700 mb-3">Top Matches Found:</h3>
+                            <!-- Job listing content will be injected here -->
+                            <div id="job-content" class="text-gray-800 leading-relaxed text-sm"></div>
+                            
+                            <div id="citation-list" class="mt-4 p-3 bg-indigo-100 border-l-4 border-indigo-500 text-indigo-800 text-xs rounded-r-lg">
+                                <p class="font-bold mb-1">🔍 Verification Sources:</p>
+                                <ul id="sources-ul" class="mt-1 space-y-1"></ul>
+                            </div>
+                        </div>
+
+                        <div id="error-message" class="hidden text-red-600 p-4 mt-4 bg-red-100 border border-red-300 rounded-lg font-medium text-sm"></div>
+
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Info Bar -->
+            <div class="mt-8 p-4 card bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 text-sm rounded-r-xl shadow-lg">
+                <p class="font-medium">Profile: <span id="user-name-display" class="font-semibold">User</span> | Your secure reference ID (for support): <span id="user-id-display" class="font-mono text-xs p-1 bg-emerald-100 rounded"></span></p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="mt-12 pt-6 border-t-2 border-gray-200 text-center text-xs text-gray-500">
+            <p>A community initiative dedicated to skill matching and remote work opportunity discovery in Kerala. Data is stored securely and used only for personalized job filtering.</p>
+        </footer>
+    </div>
+
+    <script type="module">
+        // --- Firebase Setup and Utilities ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- Global Environment Variables (MANDATORY USE) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        const apiKey = ""; // Leave as-is, Canvas provides this at runtime
+        const API_URL_BASE = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        
+        // --- App State ---
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
+        const USER_PROFILE_COLLECTION = `artifacts/${appId}/users`;
+        
+        // --- UI Elements ---
+        const setupLoading = document.getElementById('setup-loading');
+        const registrationView = document.getElementById('registration-view');
+        const matcherView = document.getElementById('matcher-view');
+        const registerButton = document.getElementById('register-button');
+        const regErrorMessage = document.getElementById('reg-error-message');
+        const resumeInput = document.getElementById('resume-input');
+        const findJobsButton = document.getElementById('find-jobs-button');
+        const statusArea = document.getElementById('status-area');
+        const keywordsDisplay = document.getElementById('keywords-display');
+        const jobResults = document.getElementById('job-results');
+        const jobContent = document.getElementById('job-content');
+        const sourcesUl = document.getElementById('sources-ul');
+        const jobErrorMessage = document.getElementById('error-message');
+        const userNameDisplay = document.getElementById('user-name-display');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const authInfo = document.getElementById('auth-info');
+
+        
+        /**
+         * Initializes Firebase and sets up the authentication listener.
+         */
+        async function initializeFirebase() {
+            try {
+                if (!firebaseConfig) throw new Error("Firebase config not available.");
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // 1. Initial Sign-in Attempt
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // 2. Auth State Listener
+                onAuthStateChanged(auth, async (user) => {
+                    isAuthReady = true;
+                    if (user) {
+                        userId = user.uid;
+                        await checkUserProfile(userId);
+                    } else {
+                        console.warn("User signed out unexpectedly. Attempting anonymous sign-in.");
+                        await signInAnonymously(auth);
+                    }
+                });
+
+            } catch (error) {
+                console.error("Firebase Initialization or Auth Error:", error);
+                setupLoading.innerHTML = `<p class="text-red-600 font-bold">Error initializing app. Check console for details.</p>`;
+            }
+        }
+
+        /**
+         * Checks if a profile exists for the current user and switches view accordingly.
+         * @param {string} uid - The Firebase user ID.
+         */
+        async function checkUserProfile(uid) {
+            setupLoading.classList.add('hidden');
+            const userDocRef = doc(db, USER_PROFILE_COLLECTION, uid);
+            
+            try {
+                const docSnap = await getDoc(userDocRef);
+
+                if (docSnap.exists()) {
+                    const profile = docSnap.data();
+                    displayMatcherView(uid, profile.name);
+                } else {
+                    displayRegistrationView(uid);
+                }
+            } catch (error) {
+                console.error("Error checking user profile:", error);
+                displayRegistrationView(uid, "Failed to load profile. Please register.");
+            }
+        }
+
+        /**
+         * Displays the main job matcher view.
+         */
+        function displayMatcherView(uid, name) {
+            registrationView.classList.add('hidden');
+            matcherView.classList.remove('hidden');
+            userIdDisplay.textContent = uid;
+            userNameDisplay.textContent = name;
+        }
+
+        /**
+         * Displays the registration form view.
+         */
+        function displayRegistrationView(uid, errorText) {
+            matcherView.classList.add('hidden');
+            registrationView.classList.remove('hidden');
+            authInfo.innerHTML = `👋 Welcome! Your temporary ID is: <span class="font-mono text-xs">${uid}</span>.`;
+            if (errorText) {
+                regErrorMessage.textContent = errorText;
+                regErrorMessage.classList.remove('hidden');
+            } else {
+                regErrorMessage.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Handles the registration form submission and saves data to Firestore.
+         */
+        window.handleRegistration = async function(event) {
+            event.preventDefault();
+            if (!userId) {
+                displayRegistrationView(null, "Authentication failed. Please refresh the page.");
+                return;
+            }
+
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const mobile = document.getElementById('reg-mobile').value.trim();
+            const whatsapp = document.getElementById('reg-whatsapp').value.trim() || mobile;
+            const password = document.getElementById('reg-password').value;
+            const district = document.getElementById('reg-district').value;
+            const profession = document.getElementById('reg-profession').value;
+            const religion = document.getElementById('reg-religion').value;
+            
+            if (!name || !email || !mobile || password.length < 6 || !district || !profession || !religion) {
+                regErrorMessage.textContent = "Please fill in all required fields.";
+                regErrorMessage.classList.remove('hidden');
+                return;
+            }
+
+            registerButton.disabled = true;
+            regErrorMessage.classList.add('hidden');
+
+            try {
+                const userDocRef = doc(db, USER_PROFILE_COLLECTION, userId);
+                const profileData = {
+                    name: name,
+                    email: email,
+                    mobile: mobile,
+                    whatsapp: whatsapp,
+                    district: district,
+                    profession: profession,
+                    religion: religion,
+                    password_simulation: password, 
+                    registrationDate: new Date().toISOString()
+                };
+
+                await setDoc(userDocRef, profileData, { merge: true });
+                displayMatcherView(userId, name);
+
+            } catch (error) {
+                console.error("Firestore Registration Error:", error);
+                regErrorMessage.textContent = `Registration failed: ${error.message}`;
+                regErrorMessage.classList.remove('hidden');
+                registerButton.disabled = false;
+            }
+        }
+
+
+        // --- Gemini API Functions ---
+
+        async function fetchWithRetry(payload, maxRetries = 3) {
+            let attempt = 0;
+            while (attempt < maxRetries) {
+                try {
+                    const response = await fetch(API_URL_BASE, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json();
+                        throw new Error(`API error: ${response.status} - ${errorBody.error?.message || response.statusText}`);
+                    }
+                    return response.json();
+                } catch (error) {
+                    attempt++;
+                    if (attempt >= maxRetries) {
+                        throw error;
+                    }
+                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+                    console.warn(`Attempt ${attempt} failed. Retrying in ${delay / 1000}s...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
+        function updateStatus(message, type = 'info') {
+            findJobsButton.disabled = type === 'loading';
+            resumeInput.disabled = type === 'loading';
+
+            let bgColor, textColor, icon = '';
+            
+            jobResults.classList.add('hidden');
+            keywordsDisplay.classList.add('hidden');
+            jobErrorMessage.classList.add('hidden');
+
+            switch (type) {
+                case 'loading':
+                    bgColor = 'bg-indigo-50';
+                    textColor = 'text-indigo-600';
+                    icon = `<div class="flex space-x-2 my-2">
+                                <div class="loading-dot w-3 h-3 bg-indigo-600 rounded-full"></div>
+                                <div class="loading-dot w-3 h-3 bg-indigo-600 rounded-full"></div>
+                                <div class="loading-dot w-3 h-3 bg-indigo-600 rounded-full"></div>
+                            </div>`;
+                    break;
+                case 'error':
+                    return;
+                case 'success':
+                    bgColor = 'bg-emerald-50';
+                    textColor = 'text-emerald-700';
+                    icon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-2 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+                    break;
+                case 'info':
+                default:
+                    bgColor = 'bg-gray-50';
+                    textColor = 'text-gray-500';
+                    icon = '';
+                    break;
+            }
+
+            statusArea.className = `text-center p-8 ${bgColor} rounded-lg flex-grow flex flex-col justify-center items-center h-48`;
+            statusArea.innerHTML = `<p class="${textColor} font-medium">${icon} ${message}</p>`;
+
+            if (type === 'success') {
+                 jobResults.classList.remove('hidden');
+                 keywordsDisplay.classList.remove('hidden');
+            }
+        }
+
+        async function extractKeywords(resumeText) {
+            updateStatus('Step 1/2: Analyzing resume and extracting key skills...', 'loading');
+
+            const systemPrompt = "You are a Resume Analyst. Your goal is to extract the most relevant professional data from the resume for job matching purposes. Extract the top 5 distinct technical/soft skills, the 3 most recent or relevant job titles, and 2 key industries/fields of experience. You must only output a single, valid JSON object following the provided schema, with no additional commentary or markdown formatting.";
+
+            const payload = {
+                contents: [{ parts: [{ text: `Resume Text: """${resumeText}"""` }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "skills": { "type": "ARRAY", "description": "Top 5 distinct technical and soft skills (e.g., 'Python', 'Project Management').", "items": { "type": "STRING" } },
+                            "titles": { "type": "ARRAY", "description": "3 most recent or relevant job titles (e.g., 'Senior Software Engineer', 'Marketing Coordinator').", "items": { "type": "STRING" } },
+                            "industries": { "type": "ARRAY", "description": "2 primary industries or fields of experience (e.g., 'Fintech', 'Healthcare IT').", "items": { "type": "STRING" } }
+                        },
+                        "propertyOrdering": ["skills", "titles", "industries"]
+                    }
+                }
+            };
+
+            const result = await fetchWithRetry(payload);
+            const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (!jsonText) {
+                throw new Error("LLM failed to return structured keyword data.");
+            }
+
+            return JSON.parse(jsonText);
+        }
+
+        async function searchJobs(keywords) {
+            updateStatus('Step 2/2: Searching the internet for current remote job postings...', 'loading');
+            
+            const skillList = keywords.skills.join(', ');
+            const titleList = keywords.titles.join(', ');
+            const industryList = keywords.industries.join(', ');
+
+            const userQuery = `Find 3-5 current, legitimate, full-time remote (work from home) job openings suitable for a candidate with skills including ${skillList}, previous roles like ${titleList}, and experience in industries such as ${industryList}. Summarize the role, company, required experience, and provide the job source/link. Focus the job search on opportunities related to 'remote work Kerala' to maintain local relevance.`;
+
+            const systemPrompt = "You are a helpful, empathetic career coach. You use the provided search results to find and summarize 3-5 current, legitimate work-from-home job openings that closely match the candidate's profile. Present the information clearly, focusing on the role, company, and brief requirements. Always link to the original source if a URI is available in the grounding metadata.";
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                tools: [{ "google_search": {} }],
+            };
+
+            const result = await fetchWithRetry(payload);
+            const candidate = result.candidates?.[0];
+
+            if (!candidate || !candidate.content?.parts?.[0]?.text) {
+                throw new Error("LLM failed to generate job search results.");
+            }
+
+            const text = candidate.content.parts[0].text;
+            
+            let sources = [];
+            const groundingMetadata = candidate.groundingMetadata;
+            if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                sources = groundingMetadata.groundingAttributions
+                    .map(attribution => ({
+                        uri: attribution.web?.uri,
+                        title: attribution.web?.title,
+                    }))
+                    .filter(source => source.uri && source.title);
+            }
+
+            return { text, sources };
+        }
+
+        window.processResume = async function() {
+            if (!userId) {
+                jobErrorMessage.textContent = 'User not authenticated. Please refresh and register.';
+                jobErrorMessage.classList.remove('hidden');
+                return;
+            }
+
+            const resumeText = resumeInput.value.trim();
+            if (!resumeText) {
+                jobErrorMessage.textContent = 'Please paste the resume text into the box to start the analysis.';
+                jobErrorMessage.classList.remove('hidden');
+                return;
+            }
+
+            jobContent.innerHTML = '';
+            sourcesUl.innerHTML = '';
+            document.getElementById('citation-list').classList.remove('hidden');
+            updateStatus('Starting analysis...', 'info');
+            jobErrorMessage.classList.add('hidden');
+
+
+            try {
+                const keywords = await extractKeywords(resumeText);
+                
+                document.getElementById('list-skills').textContent = keywords.skills.join(', ');
+                document.getElementById('list-titles').textContent = keywords.titles.join(', ');
+                document.getElementById('list-industries').textContent = keywords.industries.join(', ');
+                
+                const jobData = await searchJobs(keywords);
+                
+                jobContent.innerHTML = jobData.text.replace(/\n/g, '<br>');
+
+                if (jobData.sources.length > 0) {
+                    sourcesUl.innerHTML = '';
+                    jobData.sources.forEach((source) => {
+                        const li = document.createElement('li');
+                        li.className = 'text-xs truncate';
+                        li.innerHTML = `<a href="${source.uri}" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline font-medium">${source.title}</a>`;
+                        sourcesUl.appendChild(li);
+                    });
+                } else {
+                     document.getElementById('citation-list').classList.add('hidden');
+                     sourcesUl.innerHTML = '';
+                }
+
+                updateStatus('Job search complete! Review the opportunities below.', 'success');
+
+            } catch (error) {
+                console.error("An error occurred during the process:", error);
+                jobErrorMessage.textContent = `Error: ${error.message}. Please try again or check your resume input.`;
+                jobErrorMessage.classList.remove('hidden');
+                updateStatus('Process failed.', 'error');
+            }
+        }
+
+        // Start the Firebase initialization process
+        initializeFirebase();
+    </script>
+</body>
+</html>
+
+
